@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+    <head>
+        <meta name="generator" content="Bluefish 2.2.3" />
+        <meta charset="utf-8" />
+        <title>
+            LinuxFromScratch
+        </title>
+        <link rel="stylesheet" href="LinuxFromScratch.css" media="screen" type="text/css" />
+        <link rel="stylesheet" href="LinuxFromScratch.css" media="screen" type="text/css" />
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/claro/claro.css" media="screen">
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojox/form/resources/CheckedMultiSelect.css" media="screen">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="isDebug: true, async: false, parseOnLoad: true"></script>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+        "dijit/Tooltip", "dijit/layout/TabContainer", "dijit/form/TimeTextBox", "dojo/domReady!", "dijit/form/FilteringSelect", "dojox/form/CheckedMultiSelect",
+        "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/TooltipDialog", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/fx/Toggler", "dojo/dom-style", "dojox/encoding"
+        "dijit/form/ValidationTextBox", "dijit/TitlePane", "dijit/form/RadioButton", "dojox/validate/regexp", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+    
+    <body class="claro">
+    
+        <div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" 
+          data-dojo-props="design:'headline', gutters:true, liveSplitters:true" style="margin: 0px auto;" >
+        
+            <div class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
+            
+            	<table style="width:100%">
+                	<tr>
+                        <td valign="middle" align="center" style="width:100%"" >
+			                <b>Linux From Scratch on several popular boards (warning: work in progress!)</b>
+                		</td>
+                        <td valign="middle" align="right" id='id_link_to_github_project'>
+                        	<a href="https://github.com/osingla/atilo" target="_blank">Github&nbsp;Project</a>
+                		</td>
+                	</tr>
+                </table>
+            
+            </div>
+            <div class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter:true, region:'center'"
+            style="width: 100px;">
+
+                <div id='tab_container' data-dojo-type="dijit/layout/TabContainer" tabposition="top" tabstrip="true" >
+                
+           			<!-- Introduction -->
+                    <div selected=false id='content_pane_intro' data-dojo-type="dijit/layout/ContentPane" title="Introduction" 
+                      tooltip='Introduction - What is-it'>
+						<div data-dojo-type="dijit/layout/ContentPane" href="intro.html">
+						</div>
+                    </div>
+
+           			<!-- Raspberry Pi 2 -->
+                    <div selected=true id='content_pane_rpi2' data-dojo-type="dijit/layout/ContentPane" title="Raspberry Pi 2" 
+                      tooltip='Raspberry pi 2'>          
+						<div data-dojo-type="dijit/layout/ContentPane" href="rpi2/rpi2.html">
+						</div>
+                    </div>
+
+           			<!-- Wandboard quad -->
+                    <div id='content_pane_licensing' data-dojo-type="dijit/layout/ContentPane" title="Wandboard Quad" 
+                      tooltip='Freescale Wandboard Quad (i.mx6)'>          
+						<div data-dojo-type="dijit/layout/ContentPane" href="wandboard/wandboard.html">
+						</div>
+                    </div>
+
+           			<!-- Contact Information -->
+                    <div id='content_contact_information' data-dojo-type="dijit/layout/ContentPane" title="Contact, Licensing Information" 
+                      tooltip='Contact information, Licensing'>          
+						<div data-dojo-type="dijit/layout/ContentPane" href="contact.html">
+						</div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter: false, region: 'bottom'">
+
+	            <table style="margin: 'auto'; width: 100%;" align="left" vertical-align="middle" border="0" cellpadding="2">
+				
+					<tr style="vertical-align="middle" > 						
+                    	<td style="text-align: center">
+							<span id='msg_cnx'>
+                            </span>
+        		        </td>
+        		        
+					</tr>
+					
+				</table>
+                
+            </div>
+            
+        </div>
+            
+    </body>
+
+</html>
