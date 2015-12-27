@@ -70,7 +70,12 @@
             <li>By default, the build will use all cpu cores. Specify the maximum number of cores you want to use 
                 (For instance, my machine at home is 8-cores CPU, I usually use 4 or 6 cores for the build)</li>
             <li>Set the root password under 'System Configuration'</li>
+            <li>Enable openssh</li>
+            <li>Enable dhcpcd, then 'Network interface to configure through DHCP' should be set to eth0 </li>
         </ul>
+        
+        You can download the configuration file &nbsp;&nbsp; <a href="https://github.com/osingla/LinuxFromScratch/blob/master/configs/rpi2/minimal_img/.config" >.config</a> <br>
+        <br>
 
         Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
         <div style="width:100%;" class="code" >
@@ -81,6 +86,10 @@
             drwxr-xr-x 2 osingla osingla 4.0K Dec 26 10:22 rpi-firmware/ <br>
             -rwxr-xr-x 1 osingla osingla 3.9M Dec 26 10:35 zImage* <br>
         </div>
+
+        <!-- 
+        The <a href="javascript:eventFire(document.getElementById('pane2'), 'click');">next step</a> will involve creating a uSD card, using what has been cross-compiled by buildroot.
+        -->
 
     </body>
 

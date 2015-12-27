@@ -15,6 +15,8 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="isDebug: true, async: false, parseOnLoad: true"></script>
 
+        <script src="LinuxFromScratch.js" ></script>
+
 		<![CDATA[
         require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
         "dijit/Tooltip", "dijit/layout/TabContainer", "dijit/form/TimeTextBox", "dojo/domReady!", "dijit/form/FilteringSelect", "dojox/form/CheckedMultiSelect",
@@ -51,14 +53,14 @@
                 <div id='tab_container' data-dojo-type="dijit/layout/TabContainer" tabposition="top" tabstrip="true" >
                 
            			<!-- Introduction -->
-                    <div selected=true id='content_pane_intro' data-dojo-type="dijit/layout/ContentPane" title="Introduction" 
+                    <div selected=false id='content_pane_intro' data-dojo-type="dijit/layout/ContentPane" title="Introduction" 
                       tooltip='Introduction - What is-it'>
 						<div data-dojo-type="dijit/layout/ContentPane" href="intro.html">
 						</div>
                     </div>
 
            			<!-- Raspberry Pi 2 -->
-                    <div selected=false id='content_pane_rpi2' data-dojo-type="dijit/layout/ContentPane" title="Raspberry Pi 2" 
+                    <div selected=true id='content_pane_rpi2' data-dojo-type="dijit/layout/ContentPane" title="Raspberry Pi 2" 
                       tooltip='Raspberry pi 2'>          
 						<div data-dojo-type="dijit/layout/ContentPane" href="rpi2/rpi2.html">
 						</div>
