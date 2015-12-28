@@ -87,6 +87,13 @@
             -rwxr-xr-x 1 osingla osingla 3.9M Dec 26 10:35 zImage* <br>
         </div>
 
+        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
+        Feel free to use it if you think it will be useful to you. <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/create-sdcard.sh</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>./create-sdcard.sh --device /dev/sdg</b> <br>
+        </div>
+
         <!-- 
         The <a href="javascript:eventFire(document.getElementById('pane2'), 'click');">next step</a> will involve creating a uSD card, using what has been cross-compiled by buildroot.
         -->
