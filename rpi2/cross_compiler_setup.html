@@ -31,28 +31,23 @@
     <body>
 
         <hr>
-        This step describes how to build an image for the Rasperry PI2 with more packages, but still no GUI. <br>
-        <br>
+        This show how to setup the cross-compiler, as an example: <br>
+        <div style="width:100%;" class="code" >
+            ~$ <br>
+            ~$ <b>cd ~/lfs/rpi2/min_img/buildroot-2015.11.1</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$  <b>svn export https://github.com/osingla/LinuxFromScratch/trunk/hello_world</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$  <b>cd hello_world/</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$  <b>make</b> <br>
+        </div>
 
-        Create a working directory on the Linux host PC, for instance:
+        You will have a hello program 
         <div style="width:100%;" class="code" >
-            ~$ cd lfs <br>
-            ~/lfs$ <b>cd rpi2/</b> <br>
-            ~/lfs/rpi2$ <b>mkdir bigger_img_no_gui/</b> <br>
-            ~/lfs/rpi2$ <b>cd bigger_img_no_gui</b> <br>
-            ~/lfs/rpi2/bigger_img_no_gui$ <b>wget --no-check-certificate https://buildroot.uclibc.org/downloads/buildroot-2015.11.1.tar.bz2 </b> <br>
-            ~/lfs/rpi2/bigger_img_no_gui$ <b>tar -f buildroot-2015.11.1.tar.bz2 -x</b>  <br>
-            ~/lfs/rpi2/bigger_img_no_gui$ <b>cd buildroot-2015.11.1/</b> <br>
-            ~/lfs/rpi2/bigger_img_no_gui/buildroot-2015.11.1$ <b>wget --no-check-certificate \<br>
-                https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/configs/rpi2/bigger_img_no_gui/.config</b> <br>
-            ~/lfs/rpi2/bigger_img_no_gui/buildroot-2015.11.1$ <b>make</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$ <b>file hello</b> <br>
+            hello: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$  <br>
         </div>
-        
-        Create then a uSD card:
-        <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/bigger_img_no_gui/buildroot-2015.11.1$ wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/create-sdcard.sh 
-            ~/lfs/rpi2/bigger_img_no_gui/buildroot-2015.11.1$ ./create-sdcard.sh --device /dev/sdg 
-        </div>
+
+        Just scp this hello program into the target to test it.
 
     </body>
 
