@@ -1,0 +1,103 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <hr>
+        This step describes how to download buildroot, and build an image. <br>
+        <br>
+
+        Create a working directory on the Linux host PC, for instance:
+        <div style="width:100%;" class="code" >
+            ~$ <b>mkdir -p lfs/rpi3/min_img</b> <br>
+            ~$ <b>cd lfs/rpi3/min_img</b> <br>
+            ~/lfs/rpi3/min_img$ <br>
+        </div>
+        
+        Download and extract the latest released version of buildroot:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img$ <b>wget --no-check-certificate https://buildroot.uclibc.org/downloads/buildroot-2015.11.1.tar.bz2</b> <br>
+            ~/lfs/rpi2/min_img$ <b>tar -f buildroot-2015.11.1.tar.bz2 -x</b> <br>
+            ~/lfs/rpi2/min_img$ <b>cd buildroot-2015.11.1/</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <br>
+        </div>
+        
+        For our first image, we will just use the configuration file already setup for the Raspberry PI 2 board:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>cp configs/raspberrypi2_defconfig .config</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>make xconfig</b> <br>
+        </div>
+
+        Use <b><i>make xconfig</i></b> to browse, and/or adjust the configuration. <br>
+        Basically the configuration is: <br>
+        <ul>
+            <li>Target: ARM LE, Cortex A7, EABIhf, NEON VFPV4</li>
+            <li>Toolchain: ucLibc for kernel 4.1.5, gcc 4.9.X </li>
+            <li>System Configuration: Busybox, devtmpfs only, remount root fileystem as R/W, Busybox default shell</li>
+            <li>Filesystem image: tar the root filesystem  w/o compression </li>
+        </ul>
+
+        Notes:
+        <ul>
+            <li>You might want to enable 'Compiler Cache' (Build Options')</li>
+            <li>By default, the build will use all cpu cores. Specify the maximum number of cores you want to use 
+                (For instance, my machine at home is 8-cores CPU, I usually use 4 or 6 cores for the build)</li>
+            <li>Set the root password under 'System Configuration'</li>
+            <li>Enable openssh</li>
+            <li>Enable dhcpcd, then 'Network interface to configure through DHCP' should be set to eth0 </li>
+        </ul>
+        
+        You can download the configuration file &nbsp;&nbsp; <a href="https://github.com/osingla/LinuxFromScratch/blob/master/configs/rpi2/minimal_img/.config" >.config</a> <br>
+        <br>
+
+        Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>ls -lh output/images/</b> <br>
+            total 47M <br>
+            -rw-r--r-- 1 osingla osingla  10K Dec 26 10:35 bcm2709-rpi-2-b.dtb <br>
+            -rw-r--r-- 1 osingla osingla  43M Dec 26 10:35 rootfs.tar <br>
+            drwxr-xr-x 2 osingla osingla 4.0K Dec 26 10:22 rpi-firmware/ <br>
+            -rwxr-xr-x 1 osingla osingla 3.9M Dec 26 10:35 zImage* <br>
+        </div>
+
+        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
+        Feel free to use it if you think it will be useful to you. <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/create-sdcard.sh</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>./create-sdcard.sh --device /dev/sdg</b> <br>
+        </div>
+
+        <!-- 
+        The <a href="javascript:eventFire(document.getElementById('pane2'), 'click');">next step</a> will involve creating a uSD card, using what has been cross-compiled by buildroot.
+        -->
+
+    </body>
+
+</html>

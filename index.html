@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/claro/claro.css" media="screen">
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojox/form/resources/CheckedMultiSelect.css" media="screen">
 
-		<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="isDebug: true, async: false, parseOnLoad: true"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.13.0/dojo/dojo.js" data-dojo-config="isDebug: true, async: false, parseOnLoad: true"></script>
 
         <script src="LinuxFromScratch.js" ></script>
 
@@ -38,7 +38,7 @@
             	<table style="width:100%">
                 	<tr>
                         <td valign="middle" align="center" style="width:100%"" >
-			                <b>Linux From Scratch on several popular boards <font color="red">(warning: work in progress!)</font></b>
+			                <b>Linux From Scratch on several popular boards, mostly Raspberry PI <font color="red">(warning: work in progress!)</font></b>
                 		</td>
                         <td valign="middle" align="right" id='id_link_to_github_project'>
                         	<a href="https://github.com/osingla/LinuxFromScratch" target="_blank">Github&nbsp;Project</a>
@@ -70,6 +70,13 @@
                     <div selected=false id='content_pane_rpi2' data-dojo-type="dijit/layout/ContentPane" title="Raspberry Pi 2" 
                       tooltip='Raspberry PI 2'>          
 						<div data-dojo-type="dijit/layout/ContentPane" href="rpi2/rpi2.html">
+						</div>
+                    </div>
+
+           			<!-- Raspberry Pi 3 -->
+                    <div selected=false id='content_pane_rpi3' data-dojo-type="dijit/layout/ContentPane" title="Raspberry Pi 3" 
+                      tooltip='Raspberry PI 3'>          
+						<div data-dojo-type="dijit/layout/ContentPane" href="rpi3/rpi3.html">
 						</div>
                     </div>
 

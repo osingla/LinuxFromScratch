@@ -1,0 +1,74 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <hr>
+        This step describes how to create a uSD card using the image previously built. <br>
+        <br>
+        
+        Any uSD card will do, assuming it's at least a 2 GB card.
+        
+        We will create 2 partitions on the uSD card:
+        <ul>
+          <li>the 1st partition (128 MB) will be FAT32, and will hold the firmware (boot loader), and the kernel</li>
+          <li>the 2nd partition will be EXT4, and will contain the root filesystem.</li>
+        </ul>
+         
+        Use fdisk to create the 2 partitions:
+        <ul>
+           <li>partition 1 : type fast32 (12, 0x0C), 128 M</li>
+           <li>partition 2 : type linux  (0x83)</li>
+        </ul>
+        
+        Once you have created the partitions on the uSD card, assuming your liux host assigned the device /dec/sdg 
+        (you can check using dmes), you will do something like this to copy the firmware, the kernel and the DTB:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkdir /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkfs.vfat -n BOOT /dev/sdg1</b> <br>
+            mkfs.fat 3.0.28 (2015-05-16) <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo mount /dev/sdg1 /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo cp output/images/rpi-firmware/*</b> /tmp/xx/ <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo cp output/images/*.dtb /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo ./output/host/usr/bin/mkknlimg output/images/zImage /tmp/xx/zImage</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/xx</b> <br>
+        </div>
+
+        Copy now the root filesystem:        
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkfs.ext4 -L ROOTFS /dev/sdg2</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo mount /dev/sdg2 /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo tar -x -f output/images/rootfs.tar -C /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/xx</b> <br>
+        </div>
+
+    </body>
+
+</html>
