@@ -43,35 +43,106 @@
         
         Download and extract the latest released version of buildroot:
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img$ <b>wget --no-check-certificate https://buildroot.uclibc.org/downloads/buildroot-2015.11.1.tar.bz2</b> <br>
-            ~/lfs/rpi2/min_img$ <b>tar -f buildroot-2015.11.1.tar.bz2 -x</b> <br>
-            ~/lfs/rpi2/min_img$ <b>cd buildroot-2015.11.1/</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <br>
+            ~/lfs/rpi2/min_img$ <b>wget --no-check-certificate https://buildroot.org/downloads/buildroot-2017.02.8.tar.bz2</b> <br>
+            ~/lfs/rpi2/min_img$ <b>tar -f buildroot-2017.02.8.tar.bz2 -x</b> <br>
+            ~/lfs/rpi2/min_img$ <b>cd buildroot-2017.02.8/</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2017.02.8/$ <br>
         </div>
         
-        For our first image, we will just use the configuration file already setup for the Raspberry PI 2 board:
-        <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>cp configs/raspberrypi2_defconfig .config</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>make xconfig</b> <br>
-        </div>
+        For some unknown reason, the latest version of buildroot does not yet fully support the 64-bits mode for the Raspberry 3.
+        There is a small change to make to add support.
 
-        Use <b><i>make xconfig</i></b> to browse, and/or adjust the configuration. <br>
-        Basically the configuration is: <br>
-        <ul>
-            <li>Target: ARM LE, Cortex A7, EABIhf, NEON VFPV4</li>
-            <li>Toolchain: ucLibc for kernel 4.1.5, gcc 4.9.X </li>
-            <li>System Configuration: Busybox, devtmpfs only, remount root fileystem as R/W, Busybox default shell</li>
-            <li>Filesystem image: tar the root filesystem  w/o compression </li>
-        </ul>
+        <p>
+            Method 1
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>
+                    open the file package/rpi-firmware/Config.in with your favorure text editor (vi, etc.)
+                </li>
+                <li>
+                    on 3rd line, replace <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;depends on BR2_arm<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;depends on BR2_arm<b> || BR2_aarch64</b>
+                </li>
+            </ul>
+        </p>
+        
+        <p>
+            Method 2
+            <div style="width:100%;" class="code" >
+                ~/lfs/rpi2/min_img$ sed -i -e "s/depends on BR2_arm/depends on BR2_arm || BR2_aarch64/" package/rpi-firmware/Config.in
+            </div>
+        </p>
+        
+        Use either <b><i>make config</i></b> or <b><i>make xconfig</i></b> to adjust the configuration. <br>
+        The configuration is: <br>
+        
+        <p>
+            Target options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Target Architecture: <b>AARCH64</b> (little endian)</li>
+            </ul>
+        </p>
+
+        <p>
+            Build options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li><b>Enable compiler cache</b></li>
+            </ul>
+        </p>
+
+        <p>
+            System configuration
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Root password: <b>root</b> <i>(or any password you want)</i></li>
+                <li>Network interface to configure through DHCP: <b>eth0</b></li>
+                <li>Custom scripts to run before creating filesystem images: <b>board/raspberrypi3/post-build.sh</b></li>
+                <li>Custom scripts to run inside the fakeroot environment: <b>board/raspberrypi3/post-image.sh</b></li>
+                <li>Custom scripts to run after creating filesystem images: <b>--add-pi3-miniuart-bt-overlay</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Kernel
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Kernel version<b>Custom Git repository</b></li>
+                <li>URL of custom repository<b>https://github.com/raspberrypi/linux.git</b></li>
+                <li>Custom repository version<b>rpi-4.9.y</b></li>
+                <li>Defconfig name<b>bcmrpi3</b></li>
+                <li>Select:&nbsp;<b>Build a Device Tree Blob (DTB)</b></li>
+                <li>Device Tree Source file names<b>broadcom/bcm2710-rpi-3-b</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Target packages
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Hardware handling / Firmware - Select:&nbsp;<b>rpi-firmware</b></li>
+                <li>Networking applications - Select:&nbsp;<b>openssh</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Filesystem images
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>cpio the root filesystem (for use as an initial RAM filesystem)</b></li>
+                <li>Compression method:&nbsp;<b>gzip</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Host utilities
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>host dosfstools</b></li>
+                <li>Select:&nbsp;<b>host genimage</b></li>
+                <li>Select:&nbsp;<b>host mtools</b></li>
+            </ul>
+        </p>
 
         Notes:
         <ul>
-            <li>You might want to enable 'Compiler Cache' (Build Options')</li>
             <li>By default, the build will use all cpu cores. Specify the maximum number of cores you want to use 
                 (For instance, my machine at home is 8-cores CPU, I usually use 4 or 6 cores for the build)</li>
-            <li>Set the root password under 'System Configuration'</li>
-            <li>Enable openssh</li>
-            <li>Enable dhcpcd, then 'Network interface to configure through DHCP' should be set to eth0 </li>
         </ul>
         
         You can download the configuration file &nbsp;&nbsp; <a href="https://github.com/osingla/LinuxFromScratch/blob/master/configs/rpi2/minimal_img/.config" >.config</a> <br>
