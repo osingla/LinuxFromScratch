@@ -150,6 +150,13 @@
         You can download the configuration file &nbsp;&nbsp; 
             <a href="rpi3/minimal_img/rpi3_minimal_defconfig" >.config</a> <br>
         <br>
+
+        If you want to use the configuration file instead of changing the configuration manuall, you can use these steps: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/minimal_img/rpi3_minimal_defconfig <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ mv rpi3_minimal_defconfig configs/
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ make rpi3_minimal_defconfig
+        </div>
         
         <p>
             Depending of the speed of your build machine and your Internet speed, the build could take a while, typically in the 20 to 30 minutes for a first time build. <br>
@@ -159,7 +166,6 @@
             </div>
         </p>
         
-
         Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
         <div style="width:100%;" class="code" >
             ~/lfs/rpi3/min_img/buildroot-2017.11$ tree --charset unicode -L 2 output/images/  <br>
