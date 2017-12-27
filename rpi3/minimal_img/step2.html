@@ -34,39 +34,91 @@
         This step describes how to create a uSD card using the image previously built. <br>
         <br>
         
-        Any uSD card will do, assuming it's at least a 2 GB card.
+        Any uSD card will do, assuming it's at least a 2 GB card. >br>
+        <br>
         
-        We will create 2 partitions on the uSD card:
+        We will create one partition on the uSD card. Actually, what really matters is the first partition of the uSD card:
         <ul>
-          <li>the 1st partition (128 MB) will be FAT32, and will hold the firmware (boot loader), and the kernel</li>
-          <li>the 2nd partition will be EXT4, and will contain the root filesystem.</li>
+          <li>the 1st partition needs to be FAT32, and </li>
+          <li>the 1st partition needs to be at least 128 MB</li>
+        </ul>
+        
+        The first fat32 partition will hold
+        <ul>
+            <li>the firmware (boot loader)</li>
+            <li>the kernel and the device tree blob (dtb)</li>
+            <li>the initramfs image</li>
         </ul>
          
-        Use fdisk to create the 2 partitions:
+        Use fdisk to create the partitions:
         <ul>
-           <li>partition 1 : type fast32 (12, 0x0C), 128 M</li>
-           <li>partition 2 : type linux  (0x83)</li>
+           <li>partition 1 : type fat32 (12, 0x0C), 128 M</li>
         </ul>
         
-        Once you have created the partitions on the uSD card, assuming your liux host assigned the device /dec/sdg 
-        (you can check using dmes), you will do something like this to copy the firmware, the kernel and the DTB:
+        Once you have created the partitions on the uSD card, assuming your linux host assigned the device /dev/sdg 
+        (you can check using dmesg), you will do something like this to copy the firmware, the kernel and the DTB:
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkdir /tmp/xx</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkfs.vfat -n BOOT /dev/sdg1</b> <br>
-            mkfs.fat 3.0.28 (2015-05-16) <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo mount /dev/sdg1 /tmp/xx</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo cp output/images/rpi-firmware/*</b> /tmp/xx/ <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo cp output/images/*.dtb /tmp/xx</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo ./output/host/usr/bin/mkknlimg output/images/zImage /tmp/xx/zImage</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/xx</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>rm -rf /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkdir -p /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>fdisk -l /dev/sdg</b> <br>
+            Disk /dev/sdg: 62.5 GiB, 67108864000 bytes, 131072000 sectors <br>
+            Units: sectors of 1 * 512 = 512 bytes <br>
+            Sector size (logical/physical): 512 bytes / 512 bytes <br>
+            I/O size (minimum/optimal): 512 bytes / 512 bytes <br>
+            Disklabel type: dos <br>
+            Disk identifier: 0x00000000 <br>
+            <br>
+            Device     Boot Start       End   Sectors  Size Id Type <br>
+            /dev/sdg1  *     2048 131071999 131069952 62.5G  c W95 FAT32 (LBA) <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo partprobe /dev/sdg</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkfs.vfat -n rpi3-sd /dev/sdg1</b> <br>
+            mkfs.fat 4.1 (2017-01-24) <br>
+            mkfs.fat: warning - lowercase labels might not work properly with DOS or Windows <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo mount /dev/sdg1 /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp -r output/images/rpi-firmware/* /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/bcm2710-rpi-3-b.dtb /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/Image /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/rootfs.cpio.gz /tmp/rpi3-sd/</b>
         </div>
 
-        Copy now the root filesystem:        
+        You now need to edit two files on the uSD card:
+        <ul>
+            <li>cmdline.txt</li>
+            <li>config.txt</li>
+        </ul>
+
+        Since we use an initramfs image, we need to change the kernel parameters specified in <b>/tmp/rpid3-sd/cmdline.txt</b>: <br>
+        <ul>
+            change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;console=tty1 console=ttyAMA0,11520</code> <br>
+            </ul>
+        <br>
+
+        We need now to make a few modifications in <b>/tmp/rpid3-sd/config.txt</b> <br>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=zImage</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=Image</code> <br>
+        </ul>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;#initramfs rootfs.cpio.gz</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;initramfs rootfs.cpio.gz</code> <br>
+        </ul>
+
+        <ul>
+            Add the line at the end of the file<br>
+            <code>&nbsp;&nbsp;&nbsp;arm_control=0x200</code> <br>
+        </ul>
+        <br>
+        You can now unmount the uSD card and eject it:        
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>mkfs.ext4 -L ROOTFS /dev/sdg2</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo mount /dev/sdg2 /tmp/xx</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo tar -x -f output/images/rootfs.tar -C /tmp/xx</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/xx</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo eject /dev/sdg</b> <br>
         </div>
 
     </body>
