@@ -84,7 +84,7 @@ sudo cp output/images/*.dtb $TD || do_exit $LINENO
 sudo ./output/host/usr/bin/mkknlimg output/images/Image $TD/Image || do_exit $LINENO
 
 # Copy the root filesystem
-sudo cp output/images/rootfs.tar.gz $TD || do_exit $LINENO
+sudo cp output/images/rootfs.cpio.gz $TD || do_exit $LINENO
 
 # Done with the uSD card
 sudo umount $TD 
