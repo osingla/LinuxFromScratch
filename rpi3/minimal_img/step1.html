@@ -49,31 +49,6 @@
             ~/lfs/rpi2/min_img/buildroot-2017.11/$ <br>
         </div>
         
-        For some unknown reason, the latest version of buildroot does not yet fully support the 64-bits mode for the Raspberry 3.
-        There is a small change to make to add support.
-
-        <p>
-            Method 1
-            <ul style="list-style-position: inside; list-style-type: disc">
-                <li>
-                    open the file package/rpi-firmware/Config.in with your favorure text editor (vi, etc.)
-                </li>
-                <li>
-                    on 3rd line, replace <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;depends on BR2_arm<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;depends on BR2_arm<b> || BR2_aarch64</b>
-                </li>
-            </ul>
-        </p>
-        
-        <p>
-            Method 2
-            <div style="width:100%;" class="code" >
-                ~/lfs/rpi2/min_img$ sed -i -e "s/depends on BR2_arm/depends on BR2_arm || BR2_aarch64/" package/rpi-firmware/Config.in
-            </div>
-        </p>
-        
         Use either <b><i>make config</i></b> or <b><i>make xconfig</i></b> to adjust the configuration. <br>
         The configuration is: <br>
         
@@ -148,7 +123,7 @@
         </ul>
         
         You can download the configuration file &nbsp;&nbsp; 
-            <a href="rpi3/minimal_img/rpi3_minimal_defconfig" >.config</a> <br>
+            <a href="rpi3/minimal_img/rpi3_minimal_defconfig" >rpi3_minimal_defconfig</a> <br>
         <br>
 
         If you want to use the configuration file instead of changing the configuration manuall, you can use these steps: 

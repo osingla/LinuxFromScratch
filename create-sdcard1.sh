@@ -11,6 +11,11 @@ function help( ) {
     exit 0
 }
 
+function do_exit( ) {
+    echo "ERROR in line $1 !"
+    exit 0
+}
+
 device='/dev/sdg'
 kernel_only=0
 update=0
@@ -79,9 +84,17 @@ sudo umount ${device}1
 rm -rf /tmp/LINUX_FROM_SCRATCH_*
 TD=`mktemp -d /tmp/LINUX_FROM_SCRATCH_XXXXXX`
 sudo mount ${device}1 $TD || do_exit $LINENO
-sudo cp output/images/rpi-firmware/* $TD || do_exit $LINENO
+sudo cp -r output/images/rpi-firmware/* $TD || do_exit $LINENO
 sudo cp output/images/*.dtb $TD || do_exit $LINENO
-sudo ./output/host/usr/bin/mkknlimg output/images/Image $TD/Image || do_exit $LINENO
+sudo output/build/linux-rpi-4.9.y/scripts/mkknlimg output/images/Image $TD/Image || do_exit $LINENO
+
+# Change kernel parameters
+sudo sed -i -e "s/root=\/dev\/mmcblk0p2 rootwait //" ${TD}/cmdline.txt
+
+# Change configuration
+sudo sed -i -e "s/kernel=zImage/kernel=Image/" ${TD}/config.txt
+sudo sed -i -e "s/#initramfs rootfs.cpio.gz/initramfs rootfs.cpio.gz/" ${TD}/config.txt
+sudo sed -i -e "\$aarm_control=0x200" ${TD}/config.txt
 
 # Copy the root filesystem
 sudo cp output/images/rootfs.cpio.gz $TD || do_exit $LINENO
