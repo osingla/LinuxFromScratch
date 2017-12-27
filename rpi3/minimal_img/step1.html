@@ -153,9 +153,9 @@
 
         If you want to use the configuration file instead of changing the configuration manuall, you can use these steps: 
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi3/min_img/buildroot-2017.11$ wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/minimal_img/rpi3_minimal_defconfig <br>
-            ~/lfs/rpi3/min_img/buildroot-2017.11$ mv rpi3_minimal_defconfig configs/
-            ~/lfs/rpi3/min_img/buildroot-2017.11$ make rpi3_minimal_defconfig
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/minimal_img/rpi3_minimal_defconfig</b>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>mv rpi3_minimal_defconfig configs/</b>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>make rpi3_minimal_defconfig</b>
         </div>
         
         <p>
@@ -184,13 +184,6 @@
             &nbsp;&nbsp;&nbsp;&nbsp;`-- start.elf <br>
              <br>
             2 directories, 10 files <br>
-        </div>
-
-        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
-        Feel free to use it if you think it will be useful to you. <br>
-        <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/create-sdcard.sh</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>./create-sdcard.sh --device /dev/sdg</b> <br>
         </div>
 
         <!-- 

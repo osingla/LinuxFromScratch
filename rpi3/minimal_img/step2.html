@@ -117,10 +117,25 @@
         <br>
         You can now unmount the uSD card and eject it:        
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo umount /tmp/rpi3-sd</b> <br>
-            ~/lfs/rpi2/min_img/buildroot-2015.11.1$ <b>sudo eject /dev/sdg</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo umount /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo eject /dev/sdg</b> <br>
         </div>
 
+        <br>
+        <hr>
+        <br>
+
+        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
+        Feel free to use it instead of typing all the commmands above. <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/master/create-sdcard1.sh</b> <br>
+            ~/lfs/rpi4/min_img/buildroot-2015.11.1$ <b>./create-sdcard1.sh --device /dev/sdg</b> <br>
+        </div>
+    
+        <br>
+        YOU NEED TO ADJUST THE DEVICE NAME. <BR>
+        PLEASE TAKE A LOOK AT THE OUTPUT OF dmesg TO SEE THE DEVICE NAME.
+        <br>
     </body>
 
 </html>
