@@ -131,14 +131,17 @@
         <br>
         You can then use these steps: 
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi3/small_img$ <b>wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.bz2</b> <br>
             ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig</b> <br>
             ~/lfs/rpi3/small_img$ <b>wget https://github.com/osingla/LinuxFromScratch/raw/gh-pages/rpi3/debian_img/rootfs.tar</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/debian-rootfs.tar.bz2</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig</b> <br>
+            ~/lfs/rpi3/small_img$ <b> chmod a+x create-sdcard.sh</b> <br>
             ~/lfs/rpi3/small_img$ <b>tar -f root.tar -x</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.bz2</b> <br>
             ~/lfs/rpi3/small_img$ <b>tar -f buildroot-2017.11.1.tar.bz2 -x</b> <br>
             ~/lfs/rpi3/small_img$ <b>cd buildroot-2017.11.1</b> <br>
             ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>cp ../rpi3_debian_img_defconfig configs/</b> <br>
-            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make rpi3_debian_img_defconfig</b>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make rpi3_debian_img_defconfig</b> <br>
             ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make</b>
         </div>
         
@@ -165,38 +168,63 @@
             2 directories, 10 files <br>
         </div>
 
-        Here is the init script I am using: <br><br>
-        <code>
-            &nbsp;&nbsp;&nbsp;&nbsp;~/lfs/rpi3/debian_bootstrap$ <b>tree --charset unicode rootfs/</b> <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;rootfs/ <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;`-- sbin <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;    `-- init <br>
-            &nbsp;&nbsp;&nbsp;&nbsp; <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;1 directory, 1 file <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;~/lfs/rpi3/debian_bootstrap$ <b>cat rootfs/sbin/init</b> <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;#!/bin/ash <br>
-            &nbsp;&nbsp;&nbsp;&nbsp; <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;mount -t proc nodev /proc <br>
-            &nbsp;&nbsp;&nbsp;&nbsp; <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;mkdir -p /hd <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;while : <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;do <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  mount -t ext4 /dev/mmcblk0p2 /hd <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  if [ $? = 0 ];  <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  then <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;    break <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  fi <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  usleep 250000 <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;done <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;if [ ! -f /etc/fstab ];  <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;then <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  cp -a /dev /hd <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;  touch /etc/fstab <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;fi <br>
-            &nbsp;&nbsp;&nbsp;&nbsp; <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;exec switch_root /hd /lib/systemd/systemd
-        </code>
+        If you are curious, here is the init script I am using: &nbsp;&nbsp;
+        <a href="https://github.com/osingla/LinuxFromScratch/blob/gh-pages/rpi3/debian_img/rootfs.tar" target="_blank">/sbin/init</a>
+        <br>
+
+        Now the last step is to create a uSD card. For convenience, I created a basic shell script, which:
+        <div style="text-indent: 2.0em">
+            <li>create two partitions (fast32, ext4).</li>
+            <li>copy firmware, kernel, DTBs, initramfs image in fat32 partition.</li>
+            <li>copy the Debian root filesystem in the ext4 partition.</li>
+            <li>we also copy the kernel modules in the Debian root filesystem.</li>
+        </div>
+
+        <br>
+        <a>
+        Before running this script, please check which device is used for the uSD card. <br>
+        In my case, it is /dev/sdg, but it might be a different value on your system. <br>
+        Use then the option <b>--device /dev/XX</b>
+        </a>
+
+        <br>
+        <br>
+        To run the script: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/small_img$ <b>../create-sdcard.sh</b> <br>
+        </div>
+
+        <h3>After you boot the uSD card</h3>
+
+        If everything went well, you should boot Debian and be able to login (root, whatever password you choose).<br>
+        <br>
+        
+        Ethernet should be up and running. <br>
+        Run the command "<code><b>ip a</b></code>" to verify you got an IP address.
+        <br>
+        <br>
+
+        The first things you might want to do:        
+        <div style="text-indent: 2.0em">
+            <li>run <code><b>apt_get update</b></code></li>
+            <li>install vi and ssh server: <code><b>apt_get instal vim openssh-server</b></code></li>
+        </div>
+        <br>
+
+        Remember that if you want to ssh the unit as root, you need to change the ssh server configuration:
+        <div style="text-indent: 2.0em">
+            <li>vi /etc/ssh/sshd_config</li>
+            <li>PermitRootLogin yes</li>
+            <li>systemctl restart sshd</li>
+        </div>
+
+        From there, you have a full Debian 9 64-bits operational on your raspberry PI 3, so the sky is the limit ;-) 
+        <br>
+
+        <br>
+        I usually install a full Desktop, such as XFCE. <br>
+        Since the default Debian use a framebuffer (no acceleration), we might want to install an X driver specifically done for the RPI3. <br>
+        Time permitting, I'd describe how to do this...
 
     </body>
 
