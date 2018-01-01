@@ -36,11 +36,12 @@
         Buildroot is used to create a small initramfs bootstrap image.<br>
         Althought the Debian image created is minimalist (by choice), you can then add later all the packages you want (for instance, I usually add xfce4). <br>
         <br>
-        If you want to skip these steps, and just use the Debian stretch aarch64 root filesystem archive I created, just skip to here.
+        If you want to skip these steps, and just use the Debian stretch aarch64 root filesystem archive I created, 
+        just jump to <a href="#second_step">here</a>.
 
         <h3>The first step is to generate a Debian aarch64 stretch root filesystem image.</h3>
         
-        There are several methods available. I choose to use multistrap. <br>
+        There are several methods available. I choose to use <a href="https://wiki.debian.org/Multistrap" target="_blank">multistrap</a>. <br>
         Since multistrap only runs on a Debian based system, and since I am using Fedora, I used Debian 9 (netinst) within VirtualBox. <br>
         Please note that a Debian based distribution is needed <b>only</b> for this for step of creating the Debian root fileystem. <br>
         You can use any Linux distribution for the 2nd step involving Buildroot. <br>
@@ -53,19 +54,31 @@
         </div>
     
         We will use this multistrap configuration, which I created from the one provided under /usr/share/doc/multistrap/examples/full.conf <br>
-
+        <a href="https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/aarch64-debian-rootfs.conf" target="_blank">
+        aarch64-debian-rootfs.conf
+        </a>
         <br>        
+        <br>        
+        
+        Basically, this configuration will create a Debian root filesystem (without the kernel and few other files):
+        <div style="text-indent: 2.0em">
+            <li>Debian 9 (strech)</li>
+            <li>aarch64 binaries</li>
+            <li>With these packages installed: apt systemd init base-passwd passwd iproute2 isc-dhcp-client network-manager kmod</li>
+        </div>
+        <br>
+        
         Use these steps to create a basic root filesystem:
         <div style="width:100%;" class="code" >
-            root@test-debian9:/home/osingla# <b>wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/aarch64-debian-rootfs.conf</b> <br>
-            root@test-debian9:/home/osingla# <b>multistrap -a arm64 -d debian-rootfs -f aarch64-debian-rootfs.conf</b>
+            osingla@debian9:~$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/aarch64-debian-rootfs.conf</b> <br>
+            osingla@debian9:~$ <b>multistrap -a arm64 -d debian-rootfs -f aarch64-debian-rootfs.conf</b>
         </div>
 
-        Use these steps to configure the root filesystem:
+        Use these steps to configure the root filesystem (use either su or sudo):
         <div style="width:100%;" class="code" >
-            root@test-debian9:/home/osingla# <b>cp /usr/bin/qemu-aarch64-static debian-rootfs/usr/bin/</b> <br>
-            root@test-debian9:/home/osingla# <b>mount -o bind /dev/ target-rootfs/dev/</b> <br>
-            root@test-debian9:/home/osingla# <b>LC_ALL=C LANGUAGE=C LANG=C chroot target-rootfs dpkg --configure -a</b>
+            root@debian9:/home/osingla# <b>cp /usr/bin/qemu-aarch64-static debian-rootfs/usr/bin/</b> <br>
+            root@debian9:/home/osingla# <b>mount -o bind /dev/ debian-rootfs/dev/</b> <br>
+            root@debian9:/home/osingla# <b>LC_ALL=C LANGUAGE=C LANG=C chroot debian-rootfs dpkg --configure -a</b>
         </div>
     
         When asked about using dash as default system shell (/bin/sh), say N (you want to use bash instead). <br>
@@ -73,23 +86,23 @@
         
         Now setup the root password:
         <div style="width:100%;" class="code" >
-            root@test-debian9:/home/osingla# <b>chroot target-rootfs passwd</b>
+            root@debian9:/home/osingla# <b>chroot debian-rootfs passwd</b>
         </div>
         
         Some clean up:
         <div style="width:100%;" class="code" >
-            root@test-debian9:/home/osingla# <b>umount debian-rootfs/dev</b> <br>
-            root@test-debian9:/home/osingla# <b>rm debian-rootfs/usr/bin/qemu-aarch64-static</b>
+            root@debian9:/home/osingla# <b>umount debian-rootfs/dev</b> <br>
+            root@debian9:/home/osingla# <b>rm debian-rootfs/usr/bin/qemu-aarch64-static</b>
         </div>
         
         Create now an archive for the Debian strech aarch64 root filesystem:
         <div style="width:100%;" class="code" >
-            root@test-debian9:/home/osingla# <b>cd debian-rootfs</b> <br>
-            root@test-debian9:/home/osingla# <b>tar -c -f ../debian-rootfs.tar .</b> <br>
-            root@test-debian9:/home/osingla# <b>cd ..</b> 
+            root@debian9:/home/osingla# <b>cd debian-rootfs</b> <br>
+            root@debian9:/home/osingla# <b>tar -j -c -f ../debian-rootfs.tar.bz2 .</b> <br>
+            root@debian9:/home/osingla# <b>cd ..</b> 
         </div>
         
-        <h3>The second step is to create an initramfs image using buildroot</h3>
+        <h3 id="second_step">The second step is to create an initramfs image using buildroot</h3>
 
         The initramfs image we will create will be able to bootstrap Debian:
         <p>
@@ -105,9 +118,9 @@
     
         Download first these files (buildroot, configuration file, init script):
         <div style="text-indent: 2.0em">
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" >rpi3_debian_img_defconfig</a></li>
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" >rpi3_debian_img_defconfig</a></li>
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" >rpi3_debian_img_defconfig</a></li>
+            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
+            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
+            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
         </div>
         <br>
 
