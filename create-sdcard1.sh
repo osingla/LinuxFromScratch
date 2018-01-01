@@ -61,6 +61,7 @@ function fdisk_input( ) {
     echo -en 'd\n3\n'
     echo -en 'd\n4\n'
     echo -en 'n\np\n1\n2048\n+128M\n'
+    echo -en 'n\np\n2\n\n\n'
     echo -en 't\n1\nc\n'
     echo -en 'w\n'
 }
@@ -78,9 +79,11 @@ sleep 2
 
 # Format the partitions
 mkfs.vfat -n BOOT ${device}1
+mkfs.ext4 -F -L rootfs ${device}2
 
 # Copy the firmware and kernel
 sudo umount ${device}1
+sudo umount ${device}2
 rm -rf /tmp/LINUX_FROM_SCRATCH_*
 TD=`mktemp -d /tmp/LINUX_FROM_SCRATCH_XXXXXX`
 sudo mount ${device}1 $TD || do_exit $LINENO

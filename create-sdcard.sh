@@ -9,6 +9,11 @@ function help( ) {
     exit 0
 }
 
+function do_exit( ) {
+    echo "ERROR in line $1 !"
+    exit 0
+}
+
 device='/dev/sdg'
 kernel_only=0
 update=0
@@ -80,13 +85,20 @@ sudo umount ${device}2
 rm -rf /tmp/LINUX_FROM_SCRATCH_*
 TD=`mktemp -d /tmp/LINUX_FROM_SCRATCH_XXXXXX`
 sudo mount ${device}1 $TD || do_exit $LINENO
-sudo cp output/images/rpi-firmware/* $TD || do_exit $LINENO
+sudo cp -r output/images/rpi-firmware/* $TD || do_exit $LINENO
 sudo cp output/images/*.dtb $TD || do_exit $LINENO
-sudo ./output/host/usr/bin/mkknlimg output/images/zImage $TD/zImage || do_exit $LINENO
+sudo output/build/linux-rpi-4.9.y/scripts/mkknlimg output/images/Image $TD/Image || do_exit $LINENO
+
+# Change configuration
+sudo sed -i -e "s/kernel=zImage/kernel=Image/" ${TD}/config.txt
+sudo sed -i -e "\$aarm_control=0x200" ${TD}/config.txt
 sudo umount $TD 
 
 # Copy the root filesystem
 sudo mount ${device}2 $TD || do_exit $LINENO
 sudo tar -x -f output/images/rootfs.tar -C $TD
+
+# Done with the uSD card
 sudo umount $TD 
 rmdir $TD 
+eject $device
