@@ -118,23 +118,26 @@
     
         Download first these files (buildroot, configuration file, init script):
         <div style="text-indent: 2.0em">
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
+            <li><a href="https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
         </div>
         <br>
 
         If you choose to skip the 1st step and did not built the Debian root fileystem image yourself, 
         you can download the aarch64 Debian stretch root filesystem archive:
         <div style="text-indent: 2.0em">
-            <li><a href="rpi3/debian_img/rpi3_debian_img_defconfig" >debian-rootfs.tar</a></li>
+            <li><a href="https://github.com/osingla/LinuxFromScratch/blob/gh-pages/rpi3/debian_img/debian-rootfs.tar.bz2" >debian-rootfs.tar.bz2</a></li>
         </div>
 
         <br>
         You can then use these steps: 
         <div style="width:100%;" class="code" >
-            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig</b> <br>
-            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>mv rpi3_debian_img_defconfig configs/</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.bz2</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://github.com/osingla/LinuxFromScratch/raw/gh-pages/rpi3/debian_img/rootfs.tar</b> <br>
+            ~/lfs/rpi3/small_img$ <b>tar -f root.tar -x</b> <br>
+            ~/lfs/rpi3/small_img$ <b>tar -f buildroot-2017.11.1.tar.bz2 -x</b> <br>
+            ~/lfs/rpi3/small_img$ <b>cd buildroot-2017.11.1</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>cp ../rpi3_debian_img_defconfig configs/</b> <br>
             ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make rpi3_debian_img_defconfig</b>
             ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make</b>
         </div>
