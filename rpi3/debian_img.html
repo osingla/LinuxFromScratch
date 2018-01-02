@@ -107,11 +107,11 @@
         The initramfs image we will create will be able to bootstrap Debian:
         <p>
             <div style="text-indent: 2.0em">
-                <li>The 4.9.x kernel is armv8 (64-bits) since the SOC used in RPI3 is a quad A53.</li>
-                <li>We use uCLibc, and not uCLibc.</li>
+                <li>The kernel is 4.9.x armv8 (64-bits) since the SOC used in RPI3 is a quad A53.</li>
+                <li>We use uCLibc, and not glibc.</li>
                 <li>We build only the C toolchain (no need for C++).</li>
-                <li>We will use a small initramfs image (no need for ssh or any addition package).</li>
-                <li>Since we are using later switch_root, we are NOT using an init system.</li>
+                <li>We will use a small initramfs image (no need for ssh or any additional package).</li>
+                <li>Since we are using later switch_root, we are NOT using any init system.</li>
                 <li>All system files are stored in a single fat32 partition of the uSD card (firmware, DTBs, kernel, initramfs image).</li>
             </div>
         </p>
