@@ -1,0 +1,44 @@
+<!--
+-->
+
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        This guide explains step by step how to create a minimal linux image for the Rasperry PI2, 
+        using buildroot and a Linux host system (such as Fedora, Debian or Ubuntu).
+        <hr>
+
+        <div data-dojo-type="dojox/layout/RotatorContainer" id="myRotator" data-dojo-id="myStackContainer" showTabs="true" autoStart="false" transitionDelay="0" 
+         style="width: 100%; height: 100%">
+            <div id="pane1" data-dojo-type="dijit/layout/ContentPane" title="Step 1">
+                <div data-dojo-type="dijit/layout/ContentPane" href="rpi2/minimal_img/step1.html"></div>
+            </div>
+            <div id="pane2" data-dojo-type="dijit/layout/ContentPane" title="Step 2">
+                <div data-dojo-type="dijit/layout/ContentPane" href="rpi2/minimal_img/step2.html"></div>
+            </div>
+            <div id="pane3" data-dojo-type="dijit/layout/ContentPane" title="Step 3">
+                <div data-dojo-type="dijit/layout/ContentPane" href="rpi2/minimal_img/step3.html"></div>
+            </div>
+        </div>
+
+    </body>
+
+</html>
