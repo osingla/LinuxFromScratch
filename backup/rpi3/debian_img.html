@@ -1,0 +1,231 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <h1>How to create from the ground up a Debian 9 image for the Raspberry PI 3</h1>
+
+        This guide explains step by step how to create from the ground up a Debian 9 (stretch) image for the Rasperry PI 3, 
+        using Buildroot and a Linux host system (such as Fedora, Debian or Ubuntu). <br>
+        Buildroot is used to create a small initramfs bootstrap image.<br>
+        Althought the Debian image created is minimalist (by choice), you can then add later all the packages you want (for instance, I usually add xfce4). <br>
+        <br>
+        If you want to skip these steps, and just use the Debian stretch aarch64 root filesystem archive I created, 
+        just jump to <a href="#second_step">here</a>.
+
+        <h3>The first step is to generate a Debian aarch64 stretch root filesystem image.</h3>
+        
+        There are several methods available. I choose to use <a href="https://wiki.debian.org/Multistrap" target="_blank">multistrap</a>. <br>
+        Since multistrap only runs on a Debian based system, and since I am using Fedora, I used Debian 9 (netinst) within VirtualBox. <br>
+        Please note that a Debian based distribution is needed <b>only</b> for this for step of creating the Debian root fileystem. <br>
+        You can use any Linux distribution for the 2nd step involving Buildroot. <br>
+        If you are using a Debian based system, you might be able to use it natively without having to use a VM. <br>
+        
+        <br>
+        Packages to install in your Debian based distribution:
+        <div style="width:100%;" class="code" >
+            root@test-debian9:/home/osingla# <b>sudo apt-get install multistrap qemu qemu-user-static binfmt-support dpkg-cross</b> <br>
+        </div>
+    
+        We will use this multistrap configuration, which I created from the one provided under /usr/share/doc/multistrap/examples/full.conf <br>
+        <a href="https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/aarch64-debian-rootfs.conf" target="_blank">
+        aarch64-debian-rootfs.conf
+        </a>
+        <br>        
+        <br>        
+        
+        Basically, this configuration will create a Debian root filesystem (without the kernel and few other files):
+        <div style="text-indent: 2.0em">
+            <li>Debian 9 (strech)</li>
+            <li>aarch64 binaries</li>
+            <li>With these packages installed: apt systemd init base-passwd passwd iproute2 isc-dhcp-client network-manager kmod</li>
+        </div>
+        <br>
+        
+        Use these steps to create a basic root filesystem:
+        <div style="width:100%;" class="code" >
+            osingla@debian9:~$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/aarch64-debian-rootfs.conf</b> <br>
+            osingla@debian9:~$ <b>multistrap -a arm64 -d debian-rootfs -f aarch64-debian-rootfs.conf</b>
+        </div>
+
+        Use these steps to configure the root filesystem (use either su or sudo):
+        <div style="width:100%;" class="code" >
+            root@debian9:/home/osingla# <b>cp /usr/bin/qemu-aarch64-static debian-rootfs/usr/bin/</b> <br>
+            root@debian9:/home/osingla# <b>mount -o bind /dev/ debian-rootfs/dev/</b> <br>
+            root@debian9:/home/osingla# <b>LC_ALL=C LANGUAGE=C LANG=C chroot debian-rootfs dpkg --configure -a</b>
+        </div>
+    
+        When asked about using dash as default system shell (/bin/sh), say N (you want to use bash instead). <br>
+        <br>
+        
+        Now setup the root password:
+        <div style="width:100%;" class="code" >
+            root@debian9:/home/osingla# <b>chroot debian-rootfs passwd</b>
+        </div>
+        
+        Some clean up:
+        <div style="width:100%;" class="code" >
+            root@debian9:/home/osingla# <b>umount debian-rootfs/dev</b> <br>
+            root@debian9:/home/osingla# <b>rm debian-rootfs/usr/bin/qemu-aarch64-static</b>
+        </div>
+        
+        Create now an archive for the Debian strech aarch64 root filesystem:
+        <div style="width:100%;" class="code" >
+            root@debian9:/home/osingla# <b>cd debian-rootfs</b> <br>
+            root@debian9:/home/osingla# <b>tar -j -c -f ../debian-rootfs.tar.bz2 .</b> <br>
+            root@debian9:/home/osingla# <b>cd ..</b> 
+        </div>
+        
+        <h3 id="second_step">The second step is to create an initramfs image using buildroot</h3>
+
+        The initramfs image we will create will be able to bootstrap Debian:
+        <p>
+            <div style="text-indent: 2.0em">
+                <li>The kernel is 4.9.x armv8 (64-bits) since the SOC used in RPI3 is a quad A53.</li>
+                <li>We use uCLibc, and not glibc.</li>
+                <li>We build only the C toolchain (no need for C++).</li>
+                <li>We will use a small initramfs image (no need for ssh or any additional package).</li>
+                <li>Since we are using later switch_root, we are NOT using any init system.</li>
+                <li>All system files are stored in a single fat32 partition of the uSD card (firmware, DTBs, kernel, initramfs image).</li>
+            </div>
+        </p>
+    
+        Download first these files (buildroot, configuration file, init script):
+        <div style="text-indent: 2.0em">
+            <li><a href="https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig" target="_blank">rpi3_debian_img_defconfig</a></li>
+        </div>
+        <br>
+
+        If you choose to skip the 1st step and did not built the Debian root fileystem image yourself, 
+        you can download the aarch64 Debian stretch root filesystem archive:
+        <div style="text-indent: 2.0em">
+            <li><a href="https://github.com/osingla/LinuxFromScratch/blob/gh-pages/rpi3/debian_img/debian-rootfs.tar.bz2" >debian-rootfs.tar.bz2</a></li>
+        </div>
+
+        <br>
+        You can then use these steps: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/rpi3_debian_img_defconfig</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://github.com/osingla/LinuxFromScratch/raw/gh-pages/rpi3/debian_img/rootfs.tar</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/debian-rootfs.tar.bz2</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/rpi3/debian_img/create-sdcard.sh</b> <br>
+            ~/lfs/rpi3/small_img$ <b> chmod a+x create-sdcard.sh</b> <br>
+            ~/lfs/rpi3/small_img$ <b>tar -f root.tar -x</b> <br>
+            ~/lfs/rpi3/small_img$ <b>wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.bz2</b> <br>
+            ~/lfs/rpi3/small_img$ <b>tar -f buildroot-2017.11.1.tar.bz2 -x</b> <br>
+            ~/lfs/rpi3/small_img$ <b>cd buildroot-2017.11.1</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>cp ../rpi3_debian_img_defconfig configs/</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make rpi3_debian_img_defconfig</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make</b>
+        </div>
+        
+        It might takes 20 minutes or even more to download all the packages, and build everything.
+        <br>
+        
+        Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/debian_img/buildroot-2017.11$ <b>tree --charset unicode -L 2 output/images/</b> <br>
+            output/images/ <br>
+            |-- bcm2710-rpi-3-b.dtb <br>
+            |-- Image <br>
+            |-- rootfs.cpio <br>
+            |-- rootfs.cpio.gz <br>
+            |-- rootfs.tar <br>
+            `-- rpi-firmware <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- bootcode.bin <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- cmdline.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- config.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- fixup.dat <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- overlays <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;`-- start.elf <br>
+             <br>
+            2 directories, 10 files <br>
+        </div>
+
+        If you are curious, here is the init script I am using: &nbsp;&nbsp;
+        <a href="https://github.com/osingla/LinuxFromScratch/blob/gh-pages/rpi3/debian_img/rootfs.tar" target="_blank">/sbin/init</a>
+        <br>
+
+        Now the last step is to create a uSD card. For convenience, I created a basic shell script, which:
+        <div style="text-indent: 2.0em">
+            <li>create two partitions (fast32, ext4).</li>
+            <li>copy firmware, kernel, DTBs, initramfs image in fat32 partition.</li>
+            <li>copy the Debian root filesystem in the ext4 partition.</li>
+            <li>we also copy the kernel modules in the Debian root filesystem.</li>
+        </div>
+
+        <br>
+        <a>
+        Before running this script, please check which device is used for the uSD card. <br>
+        In my case, it is /dev/sdg, but it might be a different value on your system. <br>
+        Use then the option <b>--device /dev/XX</b>
+        </a>
+
+        <br>
+        <br>
+        To run the script: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/small_img$ <b>../create-sdcard.sh</b> <br>
+        </div>
+
+        <h3>After you boot the uSD card</h3>
+
+        If everything went well, you should boot Debian and be able to login (root, whatever password you choose).<br>
+        <br>
+        
+        Ethernet should be up and running. <br>
+        Run the command "<code><b>ip a</b></code>" to verify you got an IP address.
+        <br>
+        <br>
+
+        The first things you might want to do:        
+        <div style="text-indent: 2.0em">
+            <li>run <code><b>apt_get update</b></code></li>
+            <li>install vi and ssh server: <code><b>apt_get instal vim openssh-server</b></code></li>
+        </div>
+        <br>
+
+        Remember that if you want to ssh the unit as root, you need to change the ssh server configuration:
+        <div style="text-indent: 2.0em">
+            <li>vi /etc/ssh/sshd_config</li>
+            <li>PermitRootLogin yes</li>
+            <li>systemctl restart sshd</li>
+        </div>
+
+        From there, you have a full Debian 9 64-bits operational on your raspberry PI 3, so the sky is the limit ;-) 
+        <br>
+
+        <br>
+        I usually install a full Desktop, such as XFCE. <br>
+        Since the default Debian use a framebuffer (no acceleration), we might want to install an X driver specifically done for the RPI3. <br>
+        Time permitting, I'd describe how to do this...
+
+    </body>
+
+</html>

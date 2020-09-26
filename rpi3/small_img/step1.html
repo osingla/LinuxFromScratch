@@ -1,0 +1,170 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <hr>
+        This step describes how to download buildroot, and build an image. <br>
+        <br>
+
+        Create a working directory on the Linux host PC, for instance:
+        <div style="width:100%;" class="code" >
+            ~$ <b>mkdir -p lfs/rpi3/small_img</b> <br>
+            ~$ <b>cd lfs/rpi3/small_img</b> <br>
+            ~/lfs/rpi3/min_img$ <br>
+        </div>
+        
+        Download and extract the latest released version of buildroot:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img$ <b>wget --no-check-certificate https://buildroot.org/downloads/buildroot-2017.11.tar.bz2</b> <br>
+            ~/lfs/rpi2/min_img$ <b>tar -f buildroot-2017.11.tar.bz2 -x</b> <br>
+            ~/lfs/rpi2/min_img$ <b>cd buildroot-2017.11/</b> <br>
+            ~/lfs/rpi2/small_img/buildroot-2017.11/$ <br>
+        </div>
+        
+        Use either <b><i>make config</i></b> or <b><i>make xconfig</i></b> to adjust the configuration. <br>
+        The configuration is: <br>
+        
+        <p>
+            Target options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Target Architecture: <b>AARCH64</b> (little endian)</li>
+            </ul>
+        </p>
+
+        <p>
+            Build options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li><b>Enable compiler cache</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Toolchain
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Custom kernel headers series<b>4.9.x</b></li>
+            </ul>
+        </p>
+
+        <p>
+            System configuration
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Root password: <b>root</b> <i>(or any password you want)</i></li>
+            </ul>
+        </p>
+
+        <p>
+            Kernel
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Kernel version<b>Custom Git repository</b></li>
+                <li>URL of custom repository<b>https://github.com/raspberrypi/linux.git</b></li>
+                <li>Custom repository version<b>rpi-4.9.y</b></li>
+                <li>Defconfig name<b>bcmrpi3</b></li>
+                <li>Select:&nbsp;<b>Build a Device Tree Blob (DTB)</b></li>
+                <li>Device Tree Source file names<b>broadcom/bcm2710-rpi-3-b</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Target packages
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Hardware handling / Firmware - Select:&nbsp;<b>rpi-firmware</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Filesystem images
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>cpio the root filesystem (for use as an initial RAM filesystem)</b></li>
+                <li>Compression method:&nbsp;<b>gzip</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Host utilities
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>host dosfstools</b></li>
+                <li>Select:&nbsp;<b>host genimage</b></li>
+                <li>Select:&nbsp;<b>host mtools</b></li>
+            </ul>
+        </p>
+
+        Notes:
+        <ul>
+            <li>By default, the build will use all cpu cores. Specify the maximum number of cores you want to use 
+                (For instance, my machine at home is 8-cores CPU, I usually use 4 or 6 cores for the build)</li>
+        </ul>
+        
+        You can download the configuration file &nbsp;&nbsp; 
+            <a href="rpi3/small_img/rpi3_small_img_defconfig" >rpi3_small_img_defconfig</a> <br>
+        <br>
+
+        If you want to use the configuration file instead of changing the configuration manuall, you can use these steps: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/small_img/rpi3_small_img_defconfig</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>mv rpi3_small_defconfig configs/</b> <br>
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make rpi3_small_img_defconfig</b>
+        </div>
+        
+        <p>
+            Depending of the speed of your build machine and your Internet speed, the build could take a while, typically in the 20 to 30 minutes for a first time build. <br>
+            Build now:
+            <div style="width:100%;" class="code" >
+                ~/lfs/rpi3/small_img/buildroot-2017.11$ <b>make</b>
+            </div>
+        </p>
+        
+        Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/small_img/buildroot-2017.11$ tree --charset unicode -L 2 output/images/  <br>
+            output/images/ <br>
+            |-- bcm2710-rpi-3-b.dtb <br>
+            |-- Image <br>
+            |-- rootfs.cpio <br>
+            |-- rootfs.cpio.gz <br>
+            |-- rootfs.tar <br>
+            `-- rpi-firmware <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- bootcode.bin <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- cmdline.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- config.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- fixup.dat <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- overlays <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;`-- start.elf <br>
+             <br>
+            2 directories, 10 files <br>
+        </div>
+
+        <!-- 
+        The <a href="javascript:eventFire(document.getElementById('pane2'), 'click');">next step</a> will involve creating a uSD card, using what has been cross-compiled by buildroot.
+        -->
+
+    </body>
+
+</html>

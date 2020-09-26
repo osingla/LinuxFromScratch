@@ -1,0 +1,54 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <hr>
+        This show how to setup the cross-compiler, as an example: <br>
+        <div style="width:100%;" class="code" >
+            ~$ <br>
+            ~$ <b>cd ~/lfs/rpi2/min_img/buildroot-2015.11.1</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$  <b>svn export https://github.com/osingla/LinuxFromScratch/trunk/hello_world</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1$  <b>cd hello_world/</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$  <b>make</b> <br>
+        </div>
+
+        You will have a hello program 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$ <b>file hello</b> <br>
+            hello: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, not stripped <br>
+            ~/lfs/rpi2/min_img/buildroot-2015.11.1/hello_world$  <br>
+        </div>
+
+        Just scp this hello program into the target to test it.
+
+    </body>
+
+</html>

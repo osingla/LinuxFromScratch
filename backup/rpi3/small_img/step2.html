@@ -1,0 +1,141 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        <hr>
+        This step describes how to create a uSD card using the image previously built. <br>
+        <br>
+        
+        Any uSD card will do, assuming it's at least a 2 GB card. >br>
+        <br>
+        
+        We will create one partition on the uSD card. Actually, what really matters is the first partition of the uSD card:
+        <ul>
+          <li>the 1st partition needs to be FAT32, and </li>
+          <li>the 1st partition needs to be at least 128 MB</li>
+        </ul>
+        
+        The first fat32 partition will hold
+        <ul>
+            <li>the firmware (boot loader)</li>
+            <li>the kernel and the device tree blob (dtb)</li>
+            <li>the initramfs image</li>
+        </ul>
+         
+        Use fdisk to create the partitions:
+        <ul>
+           <li>partition 1 : type fat32 (12, 0x0C), 128 M</li>
+        </ul>
+        
+        Once you have created the partitions on the uSD card, assuming your linux host assigned the device /dev/sdg 
+        (you can check using dmesg), you will do something like this to copy the firmware, the kernel and the DTB:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>rm -rf /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkdir -p /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>fdisk -l /dev/sdg</b> <br>
+            Disk /dev/sdg: 62.5 GiB, 67108864000 bytes, 131072000 sectors <br>
+            Units: sectors of 1 * 512 = 512 bytes <br>
+            Sector size (logical/physical): 512 bytes / 512 bytes <br>
+            I/O size (minimum/optimal): 512 bytes / 512 bytes <br>
+            Disklabel type: dos <br>
+            Disk identifier: 0x00000000 <br>
+            <br>
+            Device     Boot Start       End   Sectors  Size Id Type <br>
+            /dev/sdg1  *     2048 131071999 131069952 62.5G  c W95 FAT32 (LBA) <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo partprobe /dev/sdg</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkfs.vfat -n rpi3-sd /dev/sdg1</b> <br>
+            mkfs.fat 4.1 (2017-01-24) <br>
+            mkfs.fat: warning - lowercase labels might not work properly with DOS or Windows <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo mount /dev/sdg1 /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp -r output/images/rpi-firmware/* /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/bcm2710-rpi-3-b.dtb /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/Image /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/rootfs.cpio.gz /tmp/rpi3-sd/</b>
+        </div>
+
+        You now need to edit two files on the uSD card:
+        <ul>
+            <li>cmdline.txt</li>
+            <li>config.txt</li>
+        </ul>
+
+        Since we use an initramfs image, we need to change the kernel parameters specified in <b>/tmp/rpid3-sd/cmdline.txt</b>: <br>
+        <ul>
+            change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;console=tty1 console=ttyAMA0,11520</code> <br>
+            </ul>
+        <br>
+
+        We need now to make a few modifications in <b>/tmp/rpid3-sd/config.txt</b> <br>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=zImage</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=Image</code> <br>
+        </ul>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;#initramfs rootfs.cpio.gz</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;initramfs rootfs.cpio.gz</code> <br>
+        </ul>
+
+        <ul>
+            Add the line at the end of the file<br>
+            <code>&nbsp;&nbsp;&nbsp;arm_control=0x200</code> <br>
+        </ul>
+        <br>
+        You can now unmount the uSD card and eject it:        
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo umount /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo eject /dev/sdg</b> <br>
+        </div>
+
+        <br>
+        <hr>
+        <br>
+
+        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
+        Feel free to use it instead of typing all the commmands above. <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/create-sdcard1.sh</b> <br>
+            ~/lfs/rpi4/min_img/buildroot-2015.11.1$ <b>./create-sdcard1.sh --device /dev/sdg</b> <br>
+        </div>
+    
+        <br>
+        YOU NEED TO ADJUST THE DEVICE NAME. <BR>
+        PLEASE TAKE A LOOK AT THE OUTPUT OF dmesg TO SEE THE DEVICE NAME.
+        <br>
+    </body>
+
+</html>

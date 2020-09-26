@@ -1,0 +1,161 @@
+<html>
+
+    <head>
+
+	    <style type="text/css">
+        
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+            
+         </style>
+
+    </head>
+
+    <body>
+
+        <h1>How to cross-compile a simple kernel module for Raspbian (RPI4)</h1>
+		
+		<h2>Summary</h2>
+
+        This guide explains how to cross-compile from a Linux host a kernel module that can be used from Raspian on the Rasperry PI 4. The Rasperry PI4 has enough resource (cpu, memory, storage) to compile natively a kernel module. This being said, in some cases, you might want or prefer to develop from a Linux host and cross-compile your kernel module.
+		
+		<br>
+		<br>
+		
+		You will need two things:
+		<ul>
+			<li>an arm cross development toolchain</li>
+			<li>a version of the kernel matching exactly the one used in Raspbian.</li>
+		</ul>  
+
+		<h2>arm cross development toolchain </h2>
+		
+		There are basically two main options you might want to consider:
+		<ul>
+			<li>use an arm cross-development toolchain provided by your Linux distribution (Debian9, Fedora, etc.)</li>
+			<li>build your own</li>
+		</ul>
+		
+		For the first option, simply do a Google search how to install the arm toolchain, and you will be quickly set. <br>
+		For instance, on Fedora, I just install this package: <br>
+        <div style="width:100%;" class="code" >
+			dnf install gcc-arm-linux-gnu
+        </div>
+		<br>
+		
+		I sometimes prefer to use a toolchain that I build myself. buildroot make things easy and convenient, that would be almost a shame to not take advantage of it ;-) <br>
+		
+		Once you have unarchived <a href="https://buildroot.org/">buildroot</a>, you can use this <a href="rpi3-arm-cross-toolchain_config" target="_blank">configuration file</a> which I used with buildroot-2018.02.10
+		<ul>
+			<li>cortex-a53</li>
+			<li>glibc</li>
+			<li>destination is: /opt/armv7</li>
+		</ul>
+		
+		Once built, the toolchain can be used with:<br>
+        <div style="width:100%;" class="code" >
+			export CROSS_COMPILE=/opt/armv7/bin/arm-buildroot-linux-gnueabihf-
+        </div>
+		
+		<h2>kernel matching exactly the one used in Raspbian</h2>
+		
+		Before doanloding on your host the version of the kernel matching the one used in Raspbian, you should update your Rasperry PI with the latest version: <br>
+        <div style="width:100%;" class="code" >
+			apt-get update -y<br>
+			apt-get upgrade -y
+        </div>
+		
+		This is a manual process to find the exact version of the kernel used in Raspbian...<br>
+		<br>
+		First run this command:
+        <div style="width:100%;" class="code" >
+			pi@raspberrypi:~ $ <b>uname -a</b><br>
+			Linux raspberrypi <a style="color:red">4.14.79</a>-v7+ #1159 SMP Sun Nov 4 17:50:20 GMT 2018 armv7l GNU/Linux<br>
+			pi@raspberrypi:~ $ 
+        </div>
+		
+		Then find the branch used for the kernel:<br>
+        <div style="width:100%;" class="code" >
+			pi@raspberrypi:~ $ <b>sudo apt-get -s install raspberrypi-kernel-headers<br></b>
+			Reading package lists... Done<br>
+			Building dependency tree<br>
+			Reading state information... Done<br>
+			The following NEW packages will be installed:<br>
+			  raspberrypi-kernel-headers<br>
+			0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.<br>
+			Inst raspberrypi-kernel-headers (<a style="color:red">1.20200902-1</a> Raspberry Pi Foundation:testing [armhf])<br>
+			Conf raspberrypi-kernel-headers (1.20200902-1 Raspberry Pi Foundation:testing [armhf])<br>
+			pi@raspberrypi:~ $ <br>
+        </div>
+
+		<br>
+		Then go to this url where the kernel for Rasberry PI is stored:<br>
+		<a href="https://github.com/raspberrypi/linux" target="_blank">https://github.com/raspberrypi/linux</a>
+		<br>
+		<br>
+		
+		Select the branch <b>rpi-5.4.y</b>:<br>
+		<a href="https://github.com/raspberrypi/linux/tree/rpi-5.4.y" target="_blank">https://github.com/raspberrypi/linux/tree/rpi-5.4.y</a>
+		<br>
+		<br>
+		
+		Look for the tags:<br>
+		<a href="https://github.com/raspberrypi/linux/tags" target="_blank">https://github.com/raspberrypi/linux/tags</a>
+		<br>
+		<br>
+		
+		Then search for the tag name matching the name in the raspberrypi-kernel-headers (<b>20200902</b> at the time I write this). <br>
+		Select the tag: <br>
+		<a href="https://github.com/raspberrypi/linux/releases/tag/raspberrypi-kernel_1.20200902-1" target="_blank">https://github.com/raspberrypi/linux/releases/tag/raspberrypi-kernel_1.20200902-1</a>
+		<br>
+		
+		<br>
+		You can now get the kernel for the Raspbian:
+        <div style="width:100%;" class="code" >
+			~/rpi-kernel/linux-test$ <b>git clone -b rpi-5.4.y git@github.com:raspberrypi/linux.git</b><br>
+			~/rpi-kernel/linux$ <b>git tag -l | grep 1.20200902-1</b><br>
+			raspberrypi-kernel_1.20200902-1<br>
+			~/rpi-kernel/linux$ <b>git checkout raspberrypi-kernel_1.20200902-1</b><br>
+			HEAD is now at f2f7e4b23d87 dts: bcm2711: Disable DVP by default<br>
+			~/rpi-kernel/linux$ <br>
+        </div>
+		<br>
+		
+		Apply now the configuration:
+        <div style="width:100%;" class="code" >
+			~/rpi-kernel/linux$ <b>export ARCH=arm</b><br>
+			~/rpi-kernel/linux$ <b>make bcm2711_defconfig</b><br>
+			#<br>
+			# configuration written to .config<br>
+			#<br>
+			~/rpi-kernel/linux$ <b>make oldconfig</b><br>
+			scripts/kconfig/conf  --oldconfig Kconfig<br>
+			#<br>
+			# No change to .config<br>
+			#<br>
+			~/rpi-kernel/linux$ <br>
+        </div>
+		<br>
+
+		The next step will be to cross-compile the kermel used by Raspbian.<br>
+		In order to be 100% sure I was using the exact kernel configuration, I downloaded the one used on Raspbian:
+        <div style="width:100%;" class="code" >
+			pi@raspberrypi:~ $ <b>sudo modprobe configs</b><br>
+			pi@raspberrypi:~ $ <b>ls -la /proc/config.gz</b><br>
+			-r--r--r-- 1 root root 36601 Feb 24 21:54 /proc/config.gz
+        </div>
+
+		Copy this configuration file and use it to cross-compile the kernel.
+
+		<h2>minimal kernel module</h2>
+
+    </body>
+
+</html>

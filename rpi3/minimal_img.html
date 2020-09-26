@@ -1,0 +1,297 @@
+<!--
+-->
+
+<html>
+
+    <head>
+
+	    <style type="text/css">
+            .code {
+                color: white;
+                background: #202020;
+                border-width: thin;
+                border-style: solid;
+                margin: 8px;
+                padding: 4px;
+                font-family: "Courier New", Courier, monospace;
+            }
+        </style>
+
+		<![CDATA[
+        require(["dojo/dom", "dojo/on", "dojo/parser", "dojo/ready", "dojo/query", "dijit/registry", "dijit/form/Button", "dijit/layout/BorderContainer", 
+        "dijit/layout/ContentPane", "dijit/Tooltip", "dijit/layout/TabContainer", "dojo/domReady!", "dijit/form/FilteringSelect", 
+        "dijit/layout/AccordionContainer", "dijit/layout/StackContainer", "dijit/layout/StackController",
+        "dojox/layout/RotatorContainer",
+        "dojox/form/CheckedMultiSelect", "dijit/form/DropDownButton", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/form/ComboButton",
+        "dijit/Dialog", "dojo/dom-style", "dijit/Fieldset", "dijit/form/RadioButton", "dijit/form/ComboBox", "dijit/form/Select"]
+        );
+        ]]>
+        
+    </head>
+
+    <body>
+
+        This guide explains step by step how to create a minimal linux image for the Rasperry PI 3, 
+        using buildroot and a Linux host system (such as Fedora, Debian or Ubuntu). <br>
+        <p>
+            <div style="text-indent: 2.0em">
+                <li>The kernel is armv8 (64-bits).</li>
+                <li>Instead of using glibc, we will use uCLibc.</li>
+                <li>We will use a small initramfs image.</li>
+                <li>All files are stored in a single fat32 partition of the uSD card.</li>
+            </div>
+        </p>
+        <hr>
+
+		<br>
+        This step describes how to download buildroot, and build an image. <br>
+        <br>
+
+        Create a working directory on the Linux host PC, for instance:
+        <div style="width:100%;" class="code" >
+            ~$ <b>mkdir -p lfs/rpi3/min_img</b> <br>
+            ~$ <b>cd lfs/rpi3/min_img</b> <br>
+            ~/lfs/rpi3/min_img$ <br>
+        </div>
+        
+        Download and extract the latest released version of buildroot:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi2/min_img$ <b>wget --no-check-certificate https://buildroot.org/downloads/buildroot-2017.11.tar.bz2</b> <br>
+            ~/lfs/rpi2/min_img$ <b>tar -f buildroot-2017.11.tar.bz2 -x</b> <br>
+            ~/lfs/rpi2/min_img$ <b>cd buildroot-2017.11/</b> <br>
+            ~/lfs/rpi2/min_img/buildroot-2017.11/$ <br>
+        </div>
+        
+        Use either <b><i>make config</i></b> or <b><i>make xconfig</i></b> to adjust the configuration. <br>
+        The configuration is: <br>
+        
+        <p>
+            Target options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Target Architecture: <b>AARCH64</b> (little endian)</li>
+            </ul>
+        </p>
+
+        <p>
+            Build options
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li><b>Enable compiler cache</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Toolchain
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Custom kernel headers series<b>4.9.x</b></li>
+            </ul>
+        </p>
+
+        <p>
+            System configuration
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Root password: <b>root</b> <i>(or any password you want)</i></li>
+            </ul>
+        </p>
+
+        <p>
+            Kernel
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Kernel version<b>Custom Git repository</b></li>
+                <li>URL of custom repository<b>https://github.com/raspberrypi/linux.git</b></li>
+                <li>Custom repository version<b>rpi-4.9.y</b></li>
+                <li>Defconfig name<b>bcmrpi3</b></li>
+                <li>Select:&nbsp;<b>Build a Device Tree Blob (DTB)</b></li>
+                <li>Device Tree Source file names<b>broadcom/bcm2710-rpi-3-b</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Target packages
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Hardware handling / Firmware - Select:&nbsp;<b>rpi-firmware</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Filesystem images
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>cpio the root filesystem (for use as an initial RAM filesystem)</b></li>
+                <li>Compression method:&nbsp;<b>gzip</b></li>
+            </ul>
+        </p>
+
+        <p>
+            Host utilities
+            <ul style="list-style-position: inside; list-style-type: disc">
+                <li>Select:&nbsp;<b>host dosfstools</b></li>
+                <li>Select:&nbsp;<b>host genimage</b></li>
+                <li>Select:&nbsp;<b>host mtools</b></li>
+            </ul>
+        </p>
+
+        Notes:
+        <ul>
+            <li>By default, the build will use all cpu cores. Specify the maximum number of cores you want to use 
+                (For instance, my machine at home is 8-cores CPU, I usually use 4 or 6 cores for the build)</li>
+        </ul>
+        
+        You can download the configuration file &nbsp;&nbsp; 
+            <a href="rpi3/minimal_img/rpi3_minimal_defconfig" >rpi3_minimal_defconfig</a> <br>
+        <br>
+
+        If you want to use the configuration file instead of changing the configuration manuall, you can use these steps: 
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>wget https://rawgit.com/osingla/LinuxFromScratch/gh-pages/rpi3/minimal_img/rpi3_minimal_defconfig</b>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>mv rpi3_minimal_defconfig configs/</b>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>make rpi3_minimal_defconfig</b>
+        </div>
+        
+        <p>
+            Depending of the speed of your build machine and your Internet speed, the build could take a while, typically in the 20 to 30 minutes for a first time build. <br>
+            Build now:
+            <div style="width:100%;" class="code" >
+                ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>make</b>
+            </div>
+        </p>
+        
+        Once the build is done, you will have the kernel, the Device Tree Blob (DTB), and the root filesystem tar file: <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ tree --charset unicode -L 2 output/images/  <br>
+            output/images/ <br>
+            |-- bcm2710-rpi-3-b.dtb <br>
+            |-- Image <br>
+            |-- rootfs.cpio <br>
+            |-- rootfs.cpio.gz <br>
+            |-- rootfs.tar <br>
+            `-- rpi-firmware <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- bootcode.bin <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- cmdline.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- config.txt <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- fixup.dat <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;|-- overlays <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;`-- start.elf <br>
+             <br>
+            2 directories, 10 files <br>
+        </div>
+
+        <!-- 
+        The <a href="javascript:eventFire(document.getElementById('pane2'), 'click');">next step</a> will involve creating a uSD card, using what has been cross-compiled by buildroot.
+        -->
+
+        <hr>
+        This step describes how to create a uSD card using the image previously built. <br>
+        <br>
+        
+        Any uSD card will do, assuming it's at least a 2 GB card. >br>
+        <br>
+        
+        We will create one partition on the uSD card. Actually, what really matters is the first partition of the uSD card:
+        <ul>
+          <li>the 1st partition needs to be FAT32, and </li>
+          <li>the 1st partition needs to be at least 128 MB</li>
+        </ul>
+        
+        The first fat32 partition will hold
+        <ul>
+            <li>the firmware (boot loader)</li>
+            <li>the kernel and the device tree blob (dtb)</li>
+            <li>the initramfs image</li>
+        </ul>
+         
+        Use fdisk to create the partitions:
+        <ul>
+           <li>partition 1 : type fat32 (12, 0x0C), 128 M</li>
+        </ul>
+        
+        Once you have created the partitions on the uSD card, assuming your linux host assigned the device /dev/sdg 
+        (you can check using dmesg), you will do something like this to copy the firmware, the kernel and the DTB:
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>rm -rf /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkdir -p /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>fdisk -l /dev/sdg</b> <br>
+            Disk /dev/sdg: 62.5 GiB, 67108864000 bytes, 131072000 sectors <br>
+            Units: sectors of 1 * 512 = 512 bytes <br>
+            Sector size (logical/physical): 512 bytes / 512 bytes <br>
+            I/O size (minimum/optimal): 512 bytes / 512 bytes <br>
+            Disklabel type: dos <br>
+            Disk identifier: 0x00000000 <br>
+            <br>
+            Device     Boot Start       End   Sectors  Size Id Type <br>
+            /dev/sdg1  *     2048 131071999 131069952 62.5G  c W95 FAT32 (LBA) <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo partprobe /dev/sdg</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>mkfs.vfat -n rpi3-sd /dev/sdg1</b> <br>
+            mkfs.fat 4.1 (2017-01-24) <br>
+            mkfs.fat: warning - lowercase labels might not work properly with DOS or Windows <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo mount /dev/sdg1 /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp -r output/images/rpi-firmware/* /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/bcm2710-rpi-3-b.dtb /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/Image /tmp/rpi3-sd/</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.02.8$ <b>sudo cp output/images/rootfs.cpio.gz /tmp/rpi3-sd/</b>
+        </div>
+
+        You now need to edit two files on the uSD card:
+        <ul>
+            <li>cmdline.txt</li>
+            <li>config.txt</li>
+        </ul>
+
+        Since we use an initramfs image, we need to change the kernel parameters specified in <b>/tmp/rpid3-sd/cmdline.txt</b>: <br>
+        <ul>
+            change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;console=tty1 console=ttyAMA0,11520</code> <br>
+            </ul>
+        <br>
+
+        We need now to make a few modifications in <b>/tmp/rpid3-sd/config.txt</b> <br>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=zImage</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;kernel=Image</code> <br>
+        </ul>
+        <ul>
+            Change the line <br>
+            <code>&nbsp;&nbsp;&nbsp;#initramfs rootfs.cpio.gz</code> <br>
+            with <br>
+            <code>&nbsp;&nbsp;&nbsp;initramfs rootfs.cpio.gz</code> <br>
+        </ul>
+
+        <ul>
+            Add the line at the end of the file<br>
+            <code>&nbsp;&nbsp;&nbsp;arm_control=0x200</code> <br>
+        </ul>
+        <br>
+        You can now unmount the uSD card and eject it:        
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo umount /tmp/rpi3-sd</b> <br>
+            ~/lfs/rpi3/min_img/buildroot-2017.11$ <b>sudo eject /dev/sdg</b> <br>
+        </div>
+
+        <br>
+        <hr>
+        <br>
+
+        I wrote a simple shell script which create the two partitions on the uSD card, and then copy the files. <br>
+        Feel free to use it instead of typing all the commmands above. <br>
+        <div style="width:100%;" class="code" >
+            ~/lfs/rpi3/min_img/buildroot-2015.11.1$ <b>wget https://raw.githubusercontent.com/osingla/LinuxFromScratch/gh-pages/create-sdcard1.sh</b> <br>
+            ~/lfs/rpi4/min_img/buildroot-2015.11.1$ <b>./create-sdcard1.sh --device /dev/sdg</b> <br>
+        </div>
+    
+        <br>
+        YOU NEED TO ADJUST THE DEVICE NAME. <BR>
+        PLEASE TAKE A LOOK AT THE OUTPUT OF dmesg TO SEE THE DEVICE NAME.
+        <br>
+
+        <hr>
+        You are now ready to test your uSD card. <br>
+        <br>
+        Insert this card on your Rasperry PI3, and apply power. <br>
+        If all goes well, you should get a shell. <br>
+        <br>
+
+    </body>
+
+</html>
